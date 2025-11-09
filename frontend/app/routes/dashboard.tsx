@@ -22,6 +22,12 @@ export default function Dashboard() {
         { id: 3, name: "Toilet Flush", gallons: 3 },
         { id: 4, name: "Dishwasher Load", gallons: 5 },
         { id: 5, name: "Laundry Load", gallons: 23 },
+        // <-- new extra activities
+        { id: 6, name: "Hand Wash Dishes", gallons: 4 },
+        { id: 7, name: "Garden Watering", gallons: 12 },
+        { id: 8, name: "Brush Teeth", gallons: 1 },
+        { id: 9, name: "Shave", gallons: 2 },
+        { id: 10, name: "Take a Bath", gallons: 45 },
     ];
 
     // Generate simple dummy logs across the last 7 days (including today).
@@ -49,6 +55,9 @@ export default function Dashboard() {
 
     // Replace aggregated state with a logs array that stores each logged event with a timestamp
     const [logs, setLogs] = useState<Activity[]>(() => generateDummyLogs());
+
+    // selected extra dropdown state
+    const [selectedExtraId, setSelectedExtraId] = useState<number | null>(activities[4]?.id ?? null);
 
     // --- New: modal state for selected day ---
     const [modalDate, setModalDate] = useState<Date | null>(null);
@@ -124,11 +133,11 @@ export default function Dashboard() {
     return (
         <>
             {/* Top header and progress bar */}
-            <div className="flex items-center justify-center bg-gray-100 py-2">
+            <div className="flex items-center justify-center bg-gray-100 py-1">
                 <div className="flex flex-row items-center gap-10">
                     <div>
                         <h1 className="text-3xl font-bold text-center my-2 hidden">SPLISH</h1>
-                        <img src={'../public/splish-logo.png'} alt="SPLISH Logo" className="h-23 mx-auto" />
+                        <img src={'../public/splish-logo.png'} alt="SPLISH Logo" className="h-22 mx-auto" />
                         <h2 className="text-2xl font-bold text-center mb-2">
                             Your Water Usage Today:
                         </h2>
@@ -153,7 +162,7 @@ export default function Dashboard() {
                             <h2 className="text-2xl font-bold text-center my-4">
                                 Log an Activity:
                             </h2>
-                            {activities.map((activity) => (
+                            {activities.slice(0,4).map((activity) => (
                                 <div
                                     key={activity.id}
                                     className="border-2 border-gray-400 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-gray-100 to-gray-200"
@@ -174,10 +183,43 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             ))}
+
+                            {/* Dropdown for additional activities (matching style) */}
+                            {activities.length > 4 && (
+                                <div className="border-2 border-gray-400 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-gray-100 to-gray-200">
+                                    <div className="grid grid-cols-3 gap-3 items-center">
+                                        <div className="col-span-2">
+                                            <label className="text-sm font-semibold block">More Activities</label>
+                                            <select
+                                                value={selectedExtraId ?? undefined}
+                                                onChange={(e) => setSelectedExtraId(Number(e.target.value))}
+                                                className="w-full rounded px-1 py-1 border"
+                                                aria-label="Select extra activity"
+                                            >
+                                                {activities.slice(4).map((a) => (
+                                                    <option key={a.id} value={a.id}>
+                                                        {a.name} — {a.gallons} gal
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <button
+                                            className="bg-gradient-to-br from-blue-400 to-blue-500 text-white px-4 py-3 rounded hover:from-blue-500 hover:to-blue-600 transition hover:cursor-pointer"
+                                            onClick={() => {
+                                                if (!selectedExtraId) return;
+                                                const act = activities.find(a => a.id === selectedExtraId);
+                                                if (act) logActivity(act);
+                                            }}
+                                        >
+                                            Log
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* RIGHT: Today's Activities */}
-                        <div>
+                        <div className={'overflow-scroll h-[55vh]'}>
                             <h2 className="text-2xl font-bold text-center my-4">
                                 Today's Activities:
                             </h2>
