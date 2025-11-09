@@ -14,9 +14,8 @@ type AggregatedActivity = Activity & {
 
 export default function Dashboard() {
     const budget = 80;
-    // Replace aggregated state with a logs array that stores each logged event with a timestamp
-    const [logs, setLogs] = useState<Activity[]>([]);
 
+    // Move activities above the logs so the generator can use them
     const activities: Activity[] = [
         { id: 1, name: "5 Minute Shower", gallons: 15 },
         { id: 2, name: "10 Minute Shower", gallons: 30 },
@@ -25,6 +24,31 @@ export default function Dashboard() {
         { id: 5, name: "Laundry Load", gallons: 23 },
     ];
 
+    // Generate simple dummy logs across the last 7 days (including today).
+    // Each day will get 1-3 random activity entries at different times.
+    const generateDummyLogs = (): Activity[] => {
+        const logs: Activity[] = [];
+        const now = new Date();
+        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+            const day = new Date(now);
+            day.setDate(now.getDate() - dayOffset);
+            // add 1-3 entries per day to "fill in a bit"
+            const entries = 1 + Math.floor(Math.random() * 3); // 1..3
+            for (let e = 0; e < entries; e++) {
+                const act = activities[Math.floor(Math.random() * activities.length)];
+                const ts = new Date(day);
+                // random hour between 6 and 22, random minute
+                ts.setHours(6 + Math.floor(Math.random() * 16), Math.floor(Math.random() * 60), 0, 0);
+                logs.push({ id: act.id, name: act.name, gallons: act.gallons, timestamp: ts.getTime() });
+            }
+        }
+        // optional: sort by timestamp ascending so UI that inspects order behaves predictably
+        logs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        return logs;
+    };
+
+    // Replace aggregated state with a logs array that stores each logged event with a timestamp
+    const [logs, setLogs] = useState<Activity[]>(() => generateDummyLogs());
     const startOfDay = (d = new Date()) => {
         const dt = new Date(d);
         dt.setHours(0,0,0,0);
