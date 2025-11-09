@@ -149,6 +149,12 @@ export default function Dashboard() {
                         <CircularProgressBar percentage={(gallonsUsed / budget) * 100} />
                     </div>
                 </div>
+                <div>
+                    <button
+                        className="absolute top-32 right-32 bg-gradient-to-br from-gray-100 to-gray-100 text-gray-500 px-2 py-1 rounded hover:from-stone-200 hover:to-stone-300 transition hover:cursor-pointer"
+                        // onClick={() => removeActivity(activity.id)}
+                    >Sign Out</button>
+                </div>
             </div>
 
             <hr />
