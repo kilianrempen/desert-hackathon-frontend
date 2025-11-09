@@ -2,9 +2,10 @@ import React from "react";
 
 type Props = {
   percentage?: number;
+  centerLabel?: React.ReactNode; // optional override for the centered text
 };
 
-const CircularProgressBar: React.FC<Props> = ({ percentage = 0 }) => {
+const CircularProgressBar: React.FC<Props> = ({ percentage = 0, centerLabel }) => {
   // Clamp the value between 0 and 120
   const progress = Math.min(Math.max(percentage, 0), 120);
 
@@ -56,13 +57,12 @@ const CircularProgressBar: React.FC<Props> = ({ percentage = 0 }) => {
         />
       </svg>
 
-      {/* Percentage text centered */}
+      {/* Centered label: use provided centerLabel or default to percent */}
       <div className="absolute inset-0 flex items-center justify-center text-3xl font-semibold pointer-events-none">
-        {Math.round(progress)}%
+        {centerLabel ?? `${Math.round(progress)}%`}
       </div>
     </div>
   );
 };
 
 export default CircularProgressBar;
-

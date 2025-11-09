@@ -5,6 +5,7 @@ type Activity = {
   id: number;
   name: string;
   gallons: number;
+  timestamp?: number; // added timestamp (optional for templates)
 };
 
 type AggregatedActivity = Activity & {
@@ -13,8 +14,8 @@ type AggregatedActivity = Activity & {
 
 export default function Dashboard() {
     const budget = 80;
-    const [gallonsUsed, setGallonsUsed] = useState(0);
-    const [loggedActivities, setLoggedActivities] = useState<AggregatedActivity[]>([]); // aggregated entries
+    // Replace aggregated state with a logs array that stores each logged event with a timestamp
+    const [logs, setLogs] = useState<Activity[]>([]);
 
     const activities: Activity[] = [
         { id: 1, name: "5 Minute Shower", gallons: 15 },
@@ -24,41 +25,67 @@ export default function Dashboard() {
         { id: 5, name: "Laundry Load", gallons: 23 },
     ];
 
+    const startOfDay = (d = new Date()) => {
+        const dt = new Date(d);
+        dt.setHours(0,0,0,0);
+        return dt.getTime();
+    };
+
+    const isSameDay = (ts: number, reference: Date) => {
+        const d = new Date(ts);
+        return d.getFullYear() === reference.getFullYear() &&
+               d.getMonth() === reference.getMonth() &&
+               d.getDate() === reference.getDate();
+    };
+
     const logActivity = (activity: Activity) => {
-        // increment total gallons
-        setGallonsUsed((prev) => prev + activity.gallons);
+        const entry: Activity = { ...activity, timestamp: Date.now() };
+        setLogs((prev) => [...prev, entry]);
+    };
 
-        // aggregate: if exists, increase count, otherwise add new
-        setLoggedActivities((prev) => {
-            const idx = prev.findIndex((a) => a.id === activity.id);
-            if (idx !== -1) {
-                // update existing
-                return prev.map((a, i) =>
-                    i === idx ? { ...a, count: a.count + 1 } : a
-                );
+    // Derived: today's usage and aggregated today's activities
+    const today = new Date();
+    const todaysLogs = logs.filter(l => l.timestamp && isSameDay(l.timestamp, today));
+    const gallonsUsed = todaysLogs.reduce((s, a) => s + a.gallons, 0);
+
+    const aggregatedToday: AggregatedActivity[] = Object.values(
+        todaysLogs.reduce((acc: Record<number, AggregatedActivity>, a) => {
+            if (!acc[a.id]) acc[a.id] = { ...a, count: 0 };
+            acc[a.id].count += 1;
+            return acc;
+        }, {})
+    );
+
+    const removeActivity = (activityId: number) => {
+        // Remove the most recent log entry for that activity that occurred today
+        setLogs((prev) => {
+            // find index from the end matching id and same day
+            for (let i = prev.length - 1; i >= 0; i--) {
+                const entry = prev[i];
+                if (entry.id === activityId && entry.timestamp && isSameDay(entry.timestamp, today)) {
+                    const copy = prev.slice();
+                    copy.splice(i, 1);
+                    return copy;
+                }
             }
-            // add new aggregated entry
-            return [...prev, { ...activity, count: 1 }];
+            return prev;
         });
     };
 
-    const removeActivity = (index: number) => {
-        // Read the current item from state (avoid side-effects in updater)
-        const item = loggedActivities[index];
-        if (!item) return;
-
-        // Update aggregated activities (pure updater)
-        setLoggedActivities((prev) => {
-            if (prev[index]?.count > 1) {
-                return prev.map((a, i) => (i === index ? { ...a, count: a.count - 1 } : a));
-            } else {
-                return prev.filter((_, i) => i !== index);
-            }
-        });
-
-        // Subtract gallons once (outside the loggedActivities updater)
-        setGallonsUsed((gPrev) => Math.max(0, gPrev - item.gallons));
-    };
+    // Weekly totals: last 7 days (including today)
+    const getDayLabel = (d: Date) => d.toLocaleDateString("en-US", { weekday: "short" }); // Mon, Tue,...
+    const weeklyTotals: { date: Date; total: number }[] = Array.from({ length: 7 }).map((_, i) => {
+        const d = new Date();
+        d.setDate(today.getDate() - (6 - i)); // oldest first -> newest last
+        d.setHours(0,0,0,0);
+        const total = logs.reduce((s, a) => {
+            if (!a.timestamp) return s;
+            const ts = a.timestamp;
+            if (isSameDay(ts, d)) return s + a.gallons;
+            return s;
+        }, 0);
+        return { date: d, total };
+    });
 
     return (
         <>
@@ -116,12 +143,12 @@ export default function Dashboard() {
                         Today's Activities:
                     </h2>
 
-                    {loggedActivities.length === 0 ? (
+                    {aggregatedToday.length === 0 ? (
                         <p className="text-center text-gray-500 italic">
                             No activities logged yet.
                         </p>
                     ) : (
-                        loggedActivities.map((activity, index) => (
+                        aggregatedToday.map((activity) => (
                             <div
                                 key={activity.id}
                                 className="border-2 border-blue-300 p-4 rounded-2xl w-3/5 mx-auto my-2 bg-gradient-to-br from-blue-100 to-blue-200"
@@ -137,7 +164,7 @@ export default function Dashboard() {
                                     </div>
                                     <button
                                         className="bg-gradient-to-br from-red-400 to-red-500 text-white px-4 py-3 rounded hover:from-red-500 hover:to-red-600 transition hover:cursor-pointer"
-                                        onClick={() => removeActivity(index)}
+                                        onClick={() => removeActivity(activity.id)}
                                     >
                                         Remove
                                     </button>
@@ -145,6 +172,24 @@ export default function Dashboard() {
                             </div>
                         ))
                     )}
+                </div>
+            </div>
+
+            <hr className="my-6" />
+
+            {/* WEEKLY VIEW */}
+            <div className="my-6">
+                <h2 className="text-2xl font-bold text-center mb-4">Past 7 Days</h2>
+                <div className="flex justify-center gap-6">
+                    {weeklyTotals.map(({ date, total }) => (
+                        <div key={date.toDateString()} className="flex flex-col items-center gap-2">
+                            <div className="w-28 h-28">
+                                {/* percentage relative to budget, clamp handled by component */}
+                                <CircularProgressBar percentage={(total / budget) * 100} centerLabel={total} />
+                            </div>
+                            <div className="text-sm font-medium">{getDayLabel(date)}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </>
