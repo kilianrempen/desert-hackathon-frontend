@@ -135,14 +135,16 @@ export default function Dashboard() {
                             {gallonsUsed} / {budget} Gallons
                         </h3>
                     </div>
-                    <CircularProgressBar percentage={(gallonsUsed / budget) * 100} />
+                    <div className="w-42 h-42">
+                        <CircularProgressBar percentage={(gallonsUsed / budget) * 100} />
+                    </div>
                 </div>
             </div>
 
             <hr />
 
             {/* Main grid: log + today */}
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2 w-3/4 mx-auto">
                 {/* LEFT: Log an Activity */}
                 <div>
                     <h2 className="text-2xl font-bold text-center my-4">
@@ -151,7 +153,7 @@ export default function Dashboard() {
                     {activities.map((activity) => (
                         <div
                             key={activity.id}
-                            className="border-2 border-gray-400 py-2 px-3 rounded-2xl w-3/5 mx-auto my-2 bg-gradient-to-br from-gray-100 to-gray-200"
+                            className="border-2 border-gray-400 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-gray-100 to-gray-200"
                         >
                             <div className="grid grid-cols-3 gap-3 items-center">
                                 <div className="col-span-2">
@@ -185,7 +187,7 @@ export default function Dashboard() {
                         aggregatedToday.map((activity) => (
                             <div
                                 key={activity.id}
-                                className="border-2 border-blue-300 py-2 px-3 rounded-2xl w-3/5 mx-auto my-2 bg-gradient-to-br from-blue-100 to-blue-200"
+                                className="border-2 border-blue-300 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-blue-100 to-blue-200"
                             >
                                 <div className="grid grid-cols-3 gap-3 items-center">
                                     <div className="col-span-2">
@@ -209,38 +211,38 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <hr className="my-4" />
+            <hr className="my-3" />
 
             {/* WEEKLY VIEW */}
-            <div className="my-6">
-                <h2 className="text-xl font-bold text-center">Past 7 Days:</h2>
+            <div className="mb-1 w-3/4 mx-auto">
+                <h2 className="text-xl font-bold text-center mb-2">Past 7 Days:</h2>
                 <div className="flex justify-center gap-6">
-                    {weeklyTotals.map(({ date, total }) => (
+                     {weeklyTotals.map(({ date, total }) => (
                         <div
-                            key={date.toDateString()}
-                            className="flex flex-col items-center gap-2"
-                        >
-                            {/* Make the tile clickable to open the modal for that date */}
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={() => openDay(date)}
-                                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openDay(date); }}
-                                className="w-28 h-28 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 rounded"
-                                aria-label={`View activities for ${date.toDateString()}`}
-                            >
-                                {/* percentage relative to budget, clamp handled by component */}
-                                <CircularProgressBar percentage={(total / budget) * 100} centerLabel={total} />
-                            </div>
-                            <div className="text-sm font-medium pt-2">{getDayLabel(date)}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                             key={date.toDateString()}
+                             className="flex flex-col items-center gap-1"
+                         >
+                             {/* Make the tile clickable to open the modal for that date */}
+                             <div className="text-sm font-medium pt-1">{getDayLabel(date)}</div>
+                             <div
+                                 role="button"
+                                 tabIndex={0}
+                                 onClick={() => openDay(date)}
+                                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openDay(date); }}
+                                 className="w-22 h-22 cursor-pointer"
+                                 aria-label={`View activities for ${date.toDateString()}`}
+                             >
+                                 {/* percentage relative to budget, clamp handled by component */}
+                                 <CircularProgressBar percentage={(total / budget) * 100} centerLabel={total} />
+                             </div>
+                         </div>
+                     ))}
+                 </div>
+             </div>
 
             {/* --- New: Lightbox / Modal for selected day --- */}
-            {modalDate && (
-                <div
+             {modalDate && (
+                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center"
                     onClick={closeModal}
                     role="dialog"
@@ -261,7 +263,7 @@ export default function Dashboard() {
                             </h3>
                             <button
                                 onClick={closeModal}
-                                className="text-sm text-gray-600 px-2 py-1 hover:text-gray-900"
+                                className="hover:cursor-pointer text-sm text-gray-600 px-2 py-1 hover:text-gray-900"
                                 aria-label="Close"
                             >
                                 Close
@@ -291,7 +293,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
-
         </>
     );
 }

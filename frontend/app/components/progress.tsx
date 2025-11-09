@@ -23,8 +23,8 @@ const CircularProgressBar: React.FC<Props> = ({ percentage = 0, centerLabel }) =
     <div className="relative flex items-center justify-center">
       <svg
         className="transform rotate-90"
-        width="160"
-        height="160"
+        width="100%" /* make responsive to parent size */
+        height="100%" /* make responsive to parent size */
         viewBox="0 0 160 160"
         aria-hidden="true"
       >
