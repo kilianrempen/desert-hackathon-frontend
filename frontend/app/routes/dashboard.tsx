@@ -127,7 +127,8 @@ export default function Dashboard() {
             <div className="flex items-center justify-center bg-gray-100 py-2">
                 <div className="flex flex-row items-center gap-10">
                     <div>
-                        <h1 className="text-3xl font-bold text-center my-2">SPLISH</h1>
+                        <h1 className="text-3xl font-bold text-center my-2 hidden">SPLISH</h1>
+                        <img src={'../public/splish-logo.png'} alt="SPLISH Logo" className="h-23 mx-auto" />
                         <h2 className="text-2xl font-bold text-center mb-2">
                             Your Water Usage Today:
                         </h2>
@@ -135,7 +136,7 @@ export default function Dashboard() {
                             {gallonsUsed} / {budget} Gallons
                         </h3>
                     </div>
-                    <div className="w-42 h-42">
+                    <div className="w-40 h-40">
                         <CircularProgressBar percentage={(gallonsUsed / budget) * 100} />
                     </div>
                 </div>
@@ -144,74 +145,77 @@ export default function Dashboard() {
             <hr />
 
             {/* Main grid: log + today */}
-            <div className="grid grid-cols-2 w-3/4 mx-auto">
-                {/* LEFT: Log an Activity */}
-                <div>
-                    <h2 className="text-2xl font-bold text-center my-4">
-                        Log an Activity:
-                    </h2>
-                    {activities.map((activity) => (
-                        <div
-                            key={activity.id}
-                            className="border-2 border-gray-400 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-gray-100 to-gray-200"
-                        >
-                            <div className="grid grid-cols-3 gap-3 items-center">
-                                <div className="col-span-2">
-                                    <h3 className="text-lg font-semibold mb-1">{activity.name}</h3>
-                                    <p className="text-sm italic">
-                                        Approximately {activity.gallons} gallons.
-                                    </p>
-                                </div>
-                                <button
-                                    className="bg-gradient-to-br from-blue-400 to-blue-500 text-white px-4 py-3 rounded hover:from-blue-500 hover:to-blue-600 transition hover:cursor-pointer"
-                                    onClick={() => logActivity(activity)}
+            <div className={"bg-[url('../public/water-bg.jpeg')] w-full float-none bg-cover bg-center"}>
+                <div className={'bg-white/70 pb-2'}>
+                    <div className="grid grid-cols-2 w-3/4 mx-auto">
+                        {/* LEFT: Log an Activity */}
+                        <div>
+                            <h2 className="text-2xl font-bold text-center my-4">
+                                Log an Activity:
+                            </h2>
+                            {activities.map((activity) => (
+                                <div
+                                    key={activity.id}
+                                    className="border-2 border-gray-400 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-gray-100 to-gray-200"
                                 >
-                                    Log
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* RIGHT: Today's Activities */}
-                <div>
-                    <h2 className="text-2xl font-bold text-center my-4">
-                        Today's Activities:
-                    </h2>
-
-                    {aggregatedToday.length === 0 ? (
-                        <p className="text-center text-gray-500 italic">
-                            No activities logged yet.
-                        </p>
-                    ) : (
-                        aggregatedToday.map((activity) => (
-                            <div
-                                key={activity.id}
-                                className="border-2 border-blue-300 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-blue-100 to-blue-200"
-                            >
-                                <div className="grid grid-cols-3 gap-3 items-center">
-                                    <div className="col-span-2">
-                                        <h3 className="text-lg font-semibold mb-1">
-                                            {activity.name} {activity.count > 1 ? `×${activity.count}` : ""}
-                                        </h3>
-                                        <p className="text-sm italic">
-                                            Approximately {activity.gallons * activity.count} gallons total.
-                                        </p>
+                                    <div className="grid grid-cols-3 gap-3 items-center">
+                                        <div className="col-span-2">
+                                            <h3 className="text-lg font-semibold mb-1">{activity.name}</h3>
+                                            <p className="text-sm italic">
+                                                Approximately {activity.gallons} gallons.
+                                            </p>
+                                        </div>
+                                        <button
+                                            className="bg-gradient-to-br from-blue-400 to-blue-500 text-white px-4 py-3 rounded hover:from-blue-500 hover:to-blue-600 transition hover:cursor-pointer"
+                                            onClick={() => logActivity(activity)}
+                                        >
+                                            Log
+                                        </button>
                                     </div>
-                                    <button
-                                        className="bg-gradient-to-br from-red-400 to-red-500 text-white px-4 py-3 rounded hover:from-red-500 hover:to-red-600 transition hover:cursor-pointer"
-                                        onClick={() => removeActivity(activity.id)}
-                                    >
-                                        Remove
-                                    </button>
                                 </div>
-                            </div>
-                        ))
-                    )}
+                            ))}
+                        </div>
+
+                        {/* RIGHT: Today's Activities */}
+                        <div>
+                            <h2 className="text-2xl font-bold text-center my-4">
+                                Today's Activities:
+                            </h2>
+
+                            {aggregatedToday.length === 0 ? (
+                                <p className="text-center text-gray-500 italic">
+                                    No activities logged yet.
+                                </p>
+                            ) : (
+                                aggregatedToday.map((activity) => (
+                                    <div
+                                        key={activity.id}
+                                        className="border-2 border-blue-300 py-2 px-3 rounded-2xl w-5/7 mx-auto my-2 bg-gradient-to-br from-blue-100 to-blue-200"
+                                    >
+                                        <div className="grid grid-cols-3 gap-3 items-center">
+                                            <div className="col-span-2">
+                                                <h3 className="text-lg font-semibold mb-1">
+                                                    {activity.name} {activity.count > 1 ? `×${activity.count}` : ""}
+                                                </h3>
+                                                <p className="text-sm italic">
+                                                    Approximately {activity.gallons * activity.count} gallons total.
+                                                </p>
+                                            </div>
+                                            <button
+                                                className="bg-gradient-to-br from-red-400 to-red-500 text-white px-4 py-3 rounded hover:from-red-500 hover:to-red-600 transition hover:cursor-pointer"
+                                                onClick={() => removeActivity(activity.id)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <hr className="my-3" />
+            <hr className="mb-3" />
 
             {/* WEEKLY VIEW */}
             <div className="mb-1 w-3/4 mx-auto">
